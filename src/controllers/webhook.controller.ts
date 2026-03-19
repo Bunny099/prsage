@@ -9,9 +9,9 @@ export const webhookController = async (req: Request, res: Response) => {
     const owner = req.body.repository.owner.login;
     const pull_number = req.body.pull_request.number;
     if (!id) {
-      return res.status(404).json({ message: "Id not found!" });
+      return res.status(400).json({ message: "Id not found!" });
     }
-    if (action === "opened") {
+    if (action === "opened" || action === "synchronize") {
       let response = await reviewPullRequest({ id, repo, owner, pull_number });
       res.status(200).json({ response, message: "Success!" });
     }else{
