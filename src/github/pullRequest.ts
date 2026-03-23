@@ -14,7 +14,20 @@ interface PostCommentInput{
   pull_number: number,
   body: string
 }
+interface UpdateCommentInput{
+  octo:Octokit,
+  repo:string,
+  owner:string,
+  commentId:number,
+  body:string
+}
 
+interface FetchCommentInput{
+octo: Octokit,
+  owner: string,
+  repo: string,
+  pull_number: number,
+}
 export const getPrFiles = async ({
   octo,
   owner,
@@ -27,6 +40,7 @@ export const getPrFiles = async ({
       repo,
       pull_number,
     });
+    
     return response;
   } catch (e) {
     throw new Error("Error while fetching pr files!");
@@ -41,5 +55,24 @@ export const postComment = async({octo,owner,repo,pull_number,body}:PostCommentI
   return response;
   }catch(e){
     throw new Error("Error while posting a comment")
+  }
+}
+
+export const fetchComment = async({octo,owner,repo,pull_number}:FetchCommentInput)=>{
+    try{
+      const response = await octo.rest.issues.listComments({issue_number:pull_number,owner,repo});
+      return response;
+    }catch(e){
+      throw new Error("Failed to list comments!")
+    }
+}
+
+
+export const updateComment = async({octo,owner,repo,commentId,body}:UpdateCommentInput)=>{
+  try{
+    const response = await octo.rest.issues.updateComment({owner,repo,body,comment_id:commentId});
+    return response;
+  }catch(e){
+    throw new Error("Failed to update comment!")
   }
 }
