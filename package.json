@@ -6,12 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "tsc -b && node ./dist/index.js"
+    
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.28.1",
   "dependencies": {
+    "@google/genai": "^1.44.0",
+    "@octokit/types": "^16.0.0",
+    "@octokit/webhooks": "^14.2.0",
+    "@octokit/webhooks-types": "^7.6.1",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@types/cors": "^2.8.19",
@@ -20,9 +25,16 @@
     "@types/node": "^25.3.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "octokit": "^5.0.5",
+    "openai": "^6.27.0",
+    "openssl": "^2.0.0",
     "prisma": "^7.4.2",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "smee-client": "^5.0.0"
   }
 }
