@@ -1,4 +1,5 @@
 import type { Octokit } from "octokit";
+import { octoClient } from "../utils/octoClient.js";
 interface GetFilesInput {
   octo: Octokit,
   owner: string,
@@ -76,3 +77,4 @@ export const updateComment = async({octo,owner,repo,commentId,body}:UpdateCommen
     throw new Error("Failed to update comment!")
   }
 }
+

@@ -9,3 +9,12 @@ datasource db {
   provider = "postgresql"
 }
 
+model Data{
+  id String @id @default(cuid())
+  prId BigInt
+  reviews String
+  patchFiles String
+  iteration Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
