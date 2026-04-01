@@ -9,7 +9,7 @@ export const webhookController = async (req: Request, res: Response) => {
     const owner = req.body.repository.owner.login;
     const pull_number = req.body.pull_request.number;
     const prId = req.body.pull_request.id;
-    console.log("---pr_id",prId)
+
     if (!id) {
       return res.status(400).json({ message: "Id not found!" });
     }

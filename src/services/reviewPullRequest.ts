@@ -2,10 +2,17 @@ import { jwtToken } from "../utils/jwt.js";
 import { getInstallationToken } from "../utils/installationToken.js";
 import { getPrFiles, postComment } from "../github/pullRequest.js";
 import { firstPrReview, updatedPrReview } from "../ai/ai.js";
-import { commentFormatter, iterationCommentFormatter } from "../utils/commentFormatter.js";
+import {
+  commentFormatter,
+  iterationCommentFormatter,
+} from "../utils/commentFormatter.js";
 import { octoClient } from "../utils/octoClient.js";
-import type { ExtractedFileInput, ReviewPullRequestInput } from "../utils/types.js";
+import type {
+  ExtractedFileInput,
+  ReviewPullRequestInput,
+} from "../utils/types.js";
 import { dbClient } from "../lib/db.js";
+import { retry } from "../utils/retry.js";
 
 export const reviewPullRequest = async ({
   repo,
@@ -40,11 +47,11 @@ export const reviewPullRequest = async ({
     }
 
     if (action === "opened") {
-      let geminiResponse = await firstPrReview(extractedFileData);
-      if (!geminiResponse.text) {
-        throw new Error("AI Failer!");
-      }
-      let formatedResponse = JSON.parse(geminiResponse.text);
+      let geminiResponse = await retry({
+        fn: firstPrReview,
+        data: extractedFileData,
+      });
+      let formatedResponse = JSON.parse(geminiResponse.text!);
       let body = commentFormatter(formatedResponse, 1);
       await dbClient.data.create({
         data: {
@@ -56,7 +63,7 @@ export const reviewPullRequest = async ({
       });
       await postComment({ octo, owner, repo, body, pull_number });
     }
-    
+
     if (action === "synchronize") {
       const comments = await dbClient.data.findMany({
         where: { prId },
@@ -67,17 +74,13 @@ export const reviewPullRequest = async ({
       if (!id) {
         throw new Error("Id not found!");
       }
-      let geminiResponse = await updatedPrReview({
+      
+      let geminiResponse = await retry({ fn: updatedPrReview, data:{
         oldComment: lastComment?.reviews,
         oldFiles: lastComment?.patchFiles,
         prFiles,
-      });
-
-      if (!geminiResponse.text) {
-        throw new Error("AI Failer!");
-      }
-
-      let formatedResponse = JSON.parse(geminiResponse.text);
+      } });
+      let formatedResponse = JSON.parse(geminiResponse.text!);
       if (!formatedResponse) {
         throw new Error("Gemini service error!");
       }
