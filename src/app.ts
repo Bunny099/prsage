@@ -4,13 +4,20 @@ import "dotenv/config.js";
 import { webRouter } from "./routes/webhook.routes.js";
 import cors from "cors"
 
+let development = process.env.NODE_ENV === "development";
+if(development){
+  let smeeUrl = process.env.SMEE_URL;
+  if(!smeeUrl){
+    throw new Error("Smee source not found!")
+  }
 const smee = new SmeeClient({
-  source: "https://smee.io/dEEz9njw0Ulzk3k",
+  source: smeeUrl,
   target: "http://localhost:3000/webhook/events",
   logger: console,
 });
-
 await smee.start();
+}
+
 const app:Express = express();
 
 app.use(cors())
