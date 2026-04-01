@@ -1,99 +1,89 @@
 import { GoogleGenAI } from "@google/genai";
 import "dotenv/config.js";
-const gemAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API! });
+const genAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API! });
 
 export const firstPrReview = async (data: Array<Object>) => {
-  let response = await gemAi.models.generateContent({
+  let response = await genAi.models.generateContent({
     model: "gemini-3.1-flash-lite-preview",
     contents: `
-        You are a senior software engineer performing a pull request review.
+       You are a senior software engineer reviewing a pull request.
 
-        Review the following pull request changes and provide concise feedback.
-            Focus on:
-            - bugs
-            - security issues
-            - performance concerns
-            - code quality
-            - edge cases
+      Analyze the provided code changes and give concise, high-quality feedback.
 
-       Return the result strictly in this JSON format:
+      Focus only on meaningful issues:
+      - bugs
+      - security risks
+      - performance concerns
+      - code quality problems
+      - important edge cases
 
-        {
-        "summary": "The pull request introduces JWT authentication and GitHub App integration. The overall structure is good but some error handling improvements are needed.",
-         "issues": [
-             "Environment variables are used without validation which may cause runtime errors.",
-             "Error handling for GitHub API requests is incomplete."
-         ],
-        "suggestions": [
-             "Add validation for required environment variables before use.",
-             "Consider centralizing GitHub API calls into a dedicated service layer."
-        ]
-        }
+      Avoid trivial or stylistic comments unless they impact correctness or maintainability.
 
-          
+      Return strictly valid JSON in the following format:
 
-        --------------IMPORTANT INSTRUCTIONS STRICTLY TO FOLLOW-------------------------
-         1: Do not include any text outside the JSON.
-         2: If no issues are found → return No issues!.
-         3: If no suggestion needed than return ready to merge!
-         4: Always return the summary of PR. 
-         5: Summary should be minimum 1 line and maximum 5 lines. For Issues complete issues with min 1 line and maximum 4 line issues which also include all issuues and keep it try to short and simple without overcoplicated anything And if there is no issue than defualt line for issue "No issues!". For suggestions 1 suggetions min and max 3 and no suggestion needed than default line "Ready to merge!".
-         6: For suggestions and issues keep one line end with full stop (.) not in between full stop and comma one line - line will ended when full stop (.) given at the end and separate that one line to second line with comma (,) -  in one continue  line comma (,) will be NOT allowed. so structure look like this Example of issue and suggestions both counts: issues or suggestions:[ "First line start and end here." , "Second line starts and end here." , "Third line starts and end here."] 
+      {
+        "summary": "Short overview of the PR (1-4 lines).",
+        "issues": ["Issue 1.", "Issue 2."],
+        "suggestions": ["Suggestion 1.", "Suggestion 2."]
+      }
 
-        Code changes:
-        ${JSON.stringify(data)}`,
+      Rules:
+      - Do not include any text outside JSON.
+      - Keep each issue/suggestion as a single clear sentence.
+      - If no issues, return: ["No issues."]
+      - If no suggestions, return: ["Ready to merge."]
+
+      Code changes:
+
+      ${JSON.stringify(data)}`,
   });
   return response;
 };
 // @ts-ignore
 export const updatedPrReview = async ({ oldFiles, prFiles, oldComment }) => {
   let newFiles = prFiles;
-  const response = await gemAi.models.generateContent({
-    model: "gemini-3-flash-preview",
+  const response = await genAi.models.generateContent({
+    model: "gemini-3.1-flash-lite-preview",
     contents: `
-  So You are a Senior developer who is reviewing a Pull request files second time. This time you have the old files, old comment you leave, and current updated files. You have to carefully go through each files, compare both files, what changes they made, what new things they added. Does this new commit solve the previous issues you have mention. Does it follow all best practices and does this new update to pull request is ready to merge or not.
+    You are a senior software engineer reviewing an updated pull request.
 
-    oldFiles: ${oldFiles} Go through each lines in details ,
+      You are given:
+      - previous code changes
+      - previous review feedback
+      - current updated code
 
-     oldComment (You leaved on PR): ${oldComment} , Go through each line in details ,
+      Your job:
+      - identify what issues have been resolved
+      - identify remaining or new issues
+      - evaluate if the PR quality has improved
 
-    newFiles: ${JSON.stringify(newFiles)} Go through each lines in details,
+      Focus only on meaningful changes. Avoid repeating unchanged feedback.
 
-    Dont jumpt on any conclusion before reviewing all content in details.
-    , 
-
-    After reviewing all this three files Review the following pull request changes and provide concise feedback.
-            Focus on:
-            - bugs
-            - security issues
-            - performance concerns
-            - code quality
-            - edge cases
-
-      Return the result strictly in this JSON format showen in example: 
-
+      Return strictly valid JSON in this format:
 
       {
-        "summary": "The pull request introduces JWT authentication and GitHub App integration. The overall structure is good but some error handling improvements are needed.",
-        "solvedIssues":["Authentication is moved to seperate files. security best practies also followed."]
-         "currentIssues": [
-             "Environment variables are used without validation which may cause runtime errors.",
-             "Error handling for GitHub API requests is incomplete."
-         ],
-        "suggestions": [
-             "Add validation for required environment variables before use.",
-             "Consider centralizing GitHub API calls into a dedicated service layer."
-        ],
-        
+        "summary": "Short overview of the current state of the PR.",
+        "solvedIssues": ["Resolved issue 1."],
+        "currentIssues": ["Remaining issue 1."],
+        "suggestions": ["Suggestion 1."]
       }
-      
-       --------------IMPORTANT INSTRUCTIONS STRICTLY TO FOLLOW-------------------------
-         1: Do not include any text outside the JSON.
-         2: If no solvedIssues are found → return No solved issues!. same with current issues!
-         3: If no suggestion needed than return ready to merge!
-         4: Always return the summary of PR. 
-         5: Summary should be minimum 1 line and maximum 5 lines. For Issues complete issues with min 1 line and maximum 4 line issues which also include all issuues and keep it try to short and simple without overcoplicated anything And if there is no issue than defualt line for issue "No issues!". For suggestions 1 suggetions min and max 3 and no suggestion needed than default line "Ready to merge!".
-         6: For suggestions and issues keep one line end with full stop (.) not in between full stop and comma one line - line will ended when full stop (.) given at the end and separate that one line to second line with comma (,) -  in one continue  line comma (,) will be NOT allowed. so structure look like this Example of issue and suggestions both counts: issues or suggestions:[ "First line start and end here." , "Second line starts and end here." , "Third line starts and end here."] follow this pattern for all excluding summary.
+
+      Rules:
+      - Do not include any text outside JSON.
+      - Keep each item concise and clear.
+      - If no solved issues: ["No issues resolved."]
+      - If no current issues: ["No issues."]
+      - If no suggestions: ["Ready to merge."]
+
+
+      Previous files:
+      ${oldFiles}
+
+      Previous review:
+      ${oldComment}
+
+      Current changes:
+      ${JSON.stringify(prFiles)}
 
   `,
   });
