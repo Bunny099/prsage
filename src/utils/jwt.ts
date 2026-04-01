@@ -6,8 +6,13 @@ let APP_ID = process.env.APP_ID;
 if(!APP_ID){
   throw new Error("APP is missing!")
 }
+let pK = process.env.PRIVATE_KEY;
+if(!pK){
+  throw new Error("Jwt server error!")
+}
+let finalPrivateKey = pK.split("\\n").join("\n").trim();
 export const jwtToken = async () => {
-  const privateKey = fs.readFileSync("./file/private-key.pem", "utf-8");
+  const privateKey = finalPrivateKey;
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: APP_ID,
