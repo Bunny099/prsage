@@ -20,7 +20,7 @@ await smee.start();
 
 const app:Express = express();
 
-app.use(cors())
+
 app.use(
   express.json({
     verify: (req: Request, res: Response, buf) => {
