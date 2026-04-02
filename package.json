@@ -5,8 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsc -b && node ./dist/index.js"
-    
+    "dev": "tsc -b && node ./dist/index.js",
+    "build":"tsc && prisma generate",
+    "start":"node dist/index.js",
+    "migrate":"prisma  migrate deploy",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
