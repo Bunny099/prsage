@@ -28,6 +28,8 @@ app.use(
     },
   }),
 );
-
+app.get("/",(req,res)=>{
+  res.json({status:"ok",service:"PRsage API!"})
+})
 app.use("/webhook",webRouter)
 export default app;
