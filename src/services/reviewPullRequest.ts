@@ -70,12 +70,30 @@ export const reviewPullRequest = async ({
         orderBy: { createdAt: "desc" },
       });
       let lastComment = comments.at(0);
-      let id = lastComment?.iteration;
-      if (!id) {
-        throw new Error("Id not found!");
-      }
-      
-      let geminiResponse = await retry({ fn: updatedPrReview, data:{
+      let iterationId = lastComment?.iteration;
+     
+      if(!lastComment ){
+        let geminiResponse = await retry({
+        fn: firstPrReview,
+        data: extractedFileData,
+      });
+      let formatedResponse = JSON.parse(geminiResponse.text!);
+      let body = commentFormatter(formatedResponse, 1);
+      await dbClient.data.create({
+        data: {
+          patchFiles: JSON.stringify(extractedFileData),
+          reviews: JSON.stringify(formatedResponse),
+          prId,
+          iteration: 1,
+        },
+      });
+      await postComment({ octo, owner, repo, body, pull_number });
+      return ;
+      }else{
+        if(!iterationId){
+          throw new Error("Review Error!")
+        }
+        let geminiResponse = await retry({ fn: updatedPrReview, data:{
         oldComment: lastComment?.reviews,
         oldFiles: lastComment?.patchFiles,
         prFiles,
@@ -84,16 +102,19 @@ export const reviewPullRequest = async ({
       if (!formatedResponse) {
         throw new Error("Gemini service error!");
       }
-      let body = iterationCommentFormatter(formatedResponse, id + 1);
+      let body = iterationCommentFormatter(formatedResponse, iterationId + 1);
       await dbClient.data.create({
         data: {
           prId,
           reviews: JSON.stringify(formatedResponse),
           patchFiles: JSON.stringify(extractedFileData),
-          iteration: id + 1,
+          iteration: iterationId + 1,
         },
       });
       await postComment({ octo, owner, repo, pull_number, body });
+      }
+
+      
     }
   } catch (e: any) {
     console.error(e);
