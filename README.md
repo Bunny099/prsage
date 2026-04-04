@@ -10,7 +10,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Gemini](https://img.shields.io/badge/Gemini_API-8E75B2?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/)
 
-[📦 Marketplace](https://github.com/marketplace/prsage) · [🔗 Repository](https://github.com/Bunny099/prsage) · [🌐 Live Service](https://prsage.onrender.com)
+[📦 Marketplace](https://github.com/apps/prsage) · [🔗 Repository](https://github.com/Bunny099/prsage) · [🌐 Live Service](https://prsage.onrender.com)
 
 </div>
 
@@ -118,7 +118,7 @@ pnpm dev
 
 ## 🔗 Links
 
-- 📦 **GitHub Marketplace** — [github.com/marketplace/prsage](https://github.com/marketplace/prsage)
+- 📦 **GitHub Marketplace** — [github.com/apps/prsage](https://github.com/apps/prsage)
 - 💻 **Repository** — [github.com/Bunny099/prsage](https://github.com/Bunny099/prsage)
 - 🌐 **Live Service** — [prsage.onrender.com](https://prsage.onrender.com)
 
